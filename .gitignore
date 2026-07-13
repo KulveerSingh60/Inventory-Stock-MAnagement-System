@@ -1,0 +1,56 @@
+# PHP
+*.log
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Build & Dependencies
+node_modules/
+dist/
+build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Cache
+.cache/
+cache/
+*.cache
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# Uploads (if sensitive)
+uploads/temp/
+uploads/cache/
+
+# Database backups
+*.sql
+*.dump
