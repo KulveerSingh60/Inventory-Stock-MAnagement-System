@@ -1,10 +1,12 @@
 <?php
 session_start();
 require_once '../db_config.php';
-if (!isset($_SESSION['isLoggedIn'])) { header("Location: login.php"); exit(); }
+require_once '../security.php';
+require_login();
 
 // Handle Recording New Purchase
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['complete_purchase'])) {
+    verify_csrf();
     $product_id = (int)$_POST['prodSelect'];
     $qty = (int)$_POST['purQty'];
     $price = (float)$_POST['purPrice'];
@@ -167,6 +169,7 @@ $history = $conn->query("SELECT pu.*, p.name FROM purchases pu JOIN products p O
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="purchaseForm" method="POST" action="">
+                    <?php csrf_field(); ?>
                     <div class="modal-body p-4">
                         <div class="mb-3">
                             <label class="form-label fw-bold">Select Product</label>

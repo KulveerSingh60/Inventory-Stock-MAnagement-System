@@ -1,12 +1,15 @@
 <?php
 session_start();
 require_once '../db_config.php';
-if (!isset($_SESSION['isLoggedIn'])) { header("Location: login.php"); exit(); }
+require_once '../security.php';
+require_login();
 
 // Handle Post Requests (Add/Edit/Delete)
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    verify_csrf();
     if (isset($_POST['delete_id'])) {
+        require_admin();
         $id = (int)$_POST['delete_id'];
         $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
         $stmt->bind_param("i", $id);
@@ -209,10 +212,13 @@ $categories_list = $conn->query("SELECT name FROM categories ORDER BY name ASC")
                             <td>$<?php echo number_format($p['price'], 2); ?></td>
                             <td class="<?php echo $p['qty'] < 10 ? 'text-danger fw-bold' : ''; ?>"><?php echo $p['qty']; ?> Units</td>
                             <td class="text-center">
+                                <?php if (current_role() === 'admin'): ?>
                                 <form action="" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?')">
+                                    <?php csrf_field(); ?>
                                     <input type="hidden" name="delete_id" value="<?php echo $p['id']; ?>">
                                     <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
                                 </form>
+                                <?php endif; ?>
                             </td>
                         </tr>
                         <?php $delay += 0.05; endwhile; ?>
@@ -231,6 +237,7 @@ $categories_list = $conn->query("SELECT name FROM categories ORDER BY name ASC")
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="productForm" method="POST" action="">
+                    <?php csrf_field(); ?>
                     <div class="modal-body p-4">
                         <input type="hidden" id="editIndex" name="editIndex">
                         <div class="mb-3">

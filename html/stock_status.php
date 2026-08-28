@@ -1,7 +1,8 @@
 <?php
 session_start();
 require_once '../db_config.php';
-if (!isset($_SESSION['isLoggedIn'])) { header("Location: login.php"); exit(); }
+require_once '../security.php';
+require_login();
 
 $products_res = $conn->query("SELECT * FROM products");
 $products_data = [];

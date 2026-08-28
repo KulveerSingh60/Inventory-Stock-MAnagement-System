@@ -14,13 +14,13 @@ USE inventory_system;
 -- ------------------------------------------------------------
 -- Table: users
 -- Passwords are stored as bcrypt hashes (see login.php).
--- The seeded admin user below has password: admin123
--- Change it immediately after your first login.
+-- role: 'admin' (full access) or 'staff' (no delete permissions).
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS users (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   username VARCHAR(50) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
+  role ENUM('admin','staff') NOT NULL DEFAULT 'staff',
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -85,10 +85,13 @@ CREATE TABLE IF NOT EXISTS purchases (
 -- ------------------------------------------------------------
 -- Seed data
 -- ------------------------------------------------------------
--- Default admin user (username: admin / password: admin123)
+-- Default users (change passwords after first login):
+--   admin:  admin / admin123   (full access)
+--   staff:  staff / staff123   (no delete permissions)
 -- Regenerate a new hash with: php -r "echo password_hash('yourpass', PASSWORD_DEFAULT);"
-INSERT INTO users (username, password) VALUES
-  ('admin', '$2y$10$ql/zNbius8DbosPz5Yd59O.2r/ZEjEusLvn300sLQe2tDvHHWt6Vu');
+INSERT INTO users (username, password, role) VALUES
+  ('admin', '$2y$10$ql/zNbius8DbosPz5Yd59O.2r/ZEjEusLvn300sLQe2tDvHHWt6Vu', 'admin'),
+  ('staff', '$2y$10$TLbI8Akq/6Jv9w.12.t2qeMD3JkGiN04v0t2CeEgVFznFeaIdqySK', 'staff');
 
 INSERT INTO categories (name) VALUES
   ('Electronics'),

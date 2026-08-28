@@ -1,10 +1,8 @@
 <?php
 session_start();
 require_once '../db_config.php';
-if (!isset($_SESSION['isLoggedIn'])) {
-    header("Location: login.php");
-    exit();
-}
+require_once '../security.php';
+require_login();
 
 // Fetch Stats
 $total_products = $conn->query("SELECT COUNT(*) as count FROM products")->fetch_assoc()['count'];

@@ -15,9 +15,9 @@ Simplest setup:
 Or from the command line:
    mysql -u root -p < db/schema.sql
 
-Default login:
-   Username: admin
-   Password: admin123   (change it after your first login)
+Default users:
+   Username: admin   Password: admin123   (full access - change it after first login)
+   Username: staff   Password: staff123   (no delete permissions)
 
 To create additional users with a hashed password, generate a hash first:
    php -r "echo password_hash('YOUR_PASSWORD', PASSWORD_DEFAULT);"

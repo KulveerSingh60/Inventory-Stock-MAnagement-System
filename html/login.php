@@ -1,16 +1,18 @@
 <?php
 session_start();
 require_once '../db_config.php';
+require_once '../security.php';
 
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    verify_csrf();
     $username = isset($_POST['username']) ? trim($_POST['username']) : '';
     $password = isset($_POST['password']) ? $_POST['password'] : '';
 
     if ($username === '' || $password === '') {
         $error = "Please enter both username and password.";
     } else {
-        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
+        $stmt = $conn->prepare("SELECT id, username, password, role FROM users WHERE username = ?");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -21,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 session_regenerate_id(true);
                 $_SESSION['isLoggedIn'] = true;
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'] ?? 'staff';
                 header("Location: index.php");
                 exit();
             }
@@ -160,6 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <p class="text-center text-muted mb-4">Inventory Management System</p>
 
         <form id="loginForm" method="POST" action="">
+            <?php csrf_field(); ?>
             <div class="mb-3">
                 <label class="form-label fw-semibold">Username</label>
                 <div class="input-group">

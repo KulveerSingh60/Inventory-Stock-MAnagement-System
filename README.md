@@ -40,6 +40,7 @@ A full-stack web application for managing inventory, tracking stock levels, and 
 ```
 Inventory-Stock-Management-System/
 ├── db_config.php           # Database connection (edit credentials here)
+├── security.php            # CSRF + auth/role helper functions
 ├── db/
 │   └── schema.sql          # MySQL schema + seed data (import first)
 ├── html/                   # All pages
@@ -86,8 +87,8 @@ Inventory-Stock-Management-System/
    - Start Apache + MySQL (e.g. XAMPP/WAMP)
    - Open `http://localhost/Inventory-Stock-MAnagement-System/html/login.php`
    - Default login credentials (change after first login):
-     - Username: `admin`
-     - Password: `admin123`
+     - Admin: Username `admin` / Password `admin123` (full access)
+     - Staff: Username `staff` / Password `staff123` (no delete permissions)
    - The password is stored as a bcrypt hash in the database.
 
 ---
@@ -123,9 +124,10 @@ Inventory-Stock-Management-System/
 
 - ✅ SQL Injection Prevention — all queries use **prepared statements** / parameterized binding
 - ✅ Secure password storage — bcrypt (`password_hash` / `password_verify`)
-- ✅ Session regeneration on login and server-side session auth check on every page
+- ✅ **CSRF protection** — every state-changing form includes a per-session token, verified server-side
+- ✅ **Role-based access control (RBAC)** — `admin` (full access) vs `staff` (no delete permissions, protected server-side)
+- ✅ Session regeneration on login, server-side auth check on every page
 - ✅ Output escaping in user-supplied search values (`htmlspecialchars`)
-- ⚠️ Note: this is a learning/demo project. For a production deployment, add **CSRF tokens** to all POST forms and **role-based access control** before going live.
 
 ---
 
