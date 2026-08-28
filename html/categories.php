@@ -7,20 +7,31 @@ $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['delete_id'])) {
         $id = (int)$_POST['delete_id'];
-        $conn->query("DELETE FROM categories WHERE id = $id");
+        $stmt = $conn->prepare("DELETE FROM categories WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        header("Location: categories.php");
+        exit();
     } elseif (isset($_POST['save_category'])) {
-        $name = $conn->real_escape_string($_POST['catName']);
+        $name = trim($_POST['catName']);
         $id = !empty($_POST['editId']) ? (int)$_POST['editId'] : 0;
 
-        $check = $conn->query("SELECT id FROM categories WHERE name = '$name' AND id != $id");
+        $check_stmt = $conn->prepare("SELECT id FROM categories WHERE name = ? AND id != ?");
+        $check_stmt->bind_param("si", $name, $id);
+        $check_stmt->execute();
+        $check = $check_stmt->get_result();
+
         if ($check->num_rows > 0) {
             $error = "Category '$name' already exists.";
         } else {
             if ($id > 0) {
-                $conn->query("UPDATE categories SET name='$name' WHERE id=$id");
+                $stmt = $conn->prepare("UPDATE categories SET name=? WHERE id=?");
+                $stmt->bind_param("si", $name, $id);
             } else {
-                $conn->query("INSERT INTO categories (name) VALUES ('$name')");
+                $stmt = $conn->prepare("INSERT INTO categories (name) VALUES (?)");
+                $stmt->bind_param("s", $name);
             }
+            $stmt->execute();
             header("Location: categories.php");
             exit();
         }

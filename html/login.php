@@ -4,18 +4,27 @@ require_once '../db_config.php';
 
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username = $conn->real_escape_string($_POST['username']);
-    $password = $_POST['password'];
+    $username = isset($_POST['username']) ? trim($_POST['username']) : '';
+    $password = isset($_POST['password']) ? $_POST['password'] : '';
 
-    $sql = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows > 0) {
-        $_SESSION['isLoggedIn'] = true;
-        $_SESSION['username'] = $username;
-        header("Location: index.php");
-        exit();
+    if ($username === '' || $password === '') {
+        $error = "Please enter both username and password.";
     } else {
+        $stmt = $conn->prepare("SELECT id, username, password FROM users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            if (password_verify($password, $user['password'])) {
+                session_regenerate_id(true);
+                $_SESSION['isLoggedIn'] = true;
+                $_SESSION['username'] = $user['username'];
+                header("Location: index.php");
+                exit();
+            }
+        }
         $error = "Invalid username or password.";
     }
 }
@@ -160,9 +169,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             
             <div class="mb-4">
-                <div class="d-flex justify-content-between">
+                <div class="mb-2">
                     <label class="form-label fw-semibold">Password</label>
-                    <a href="#" class="text-decoration-none small text-primary" data-bs-toggle="modal" data-bs-target="#forgotModal">Forgot?</a>
                 </div>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0"><i class="fas fa-lock text-muted"></i></span>
@@ -190,35 +198,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </button>
             </div>
         </form>
-    </div>
-
-    <!-- Forgot Password Modal -->
-    <div class="modal fade" id="forgotModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Forgot Password</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <label class="form-label fw-semibold">Enter your username</label>
-                    <div class="input-group mb-3">
-                        <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
-                        <input type="text" id="forgotUsername" class="form-control" placeholder="Username">
-                    </div>
-                    <div id="forgotAlert" class="alert alert-danger d-none" role="alert">
-                        Username not found.
-                    </div>
-                    <div id="forgotSuccess" class="alert alert-success d-none" role="alert">
-                        Your password is: <strong id="foundPassword"></strong>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" onclick="retrievePassword()">Retrieve Password</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>

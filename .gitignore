@@ -54,3 +54,6 @@ uploads/cache/
 # Database backups
 *.sql
 *.dump
+
+# ...but keep the tracked schema file
+!db/schema.sql

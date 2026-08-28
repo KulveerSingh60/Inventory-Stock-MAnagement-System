@@ -8,26 +8,40 @@ $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['delete_id'])) {
         $id = (int)$_POST['delete_id'];
-        $conn->query("DELETE FROM products WHERE id = $id");
+        $stmt = $conn->prepare("DELETE FROM products WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        header("Location: products.php");
+        exit();
     } elseif (isset($_POST['save_product'])) {
-        $name = $conn->real_escape_string($_POST['pName']);
-        $cat  = $conn->real_escape_string($_POST['pCategory']);
+        $name = trim($_POST['pName']);
+        $cat  = trim($_POST['pCategory']);
         $price = (float)$_POST['pPrice'];
         $qty   = (int)$_POST['pQty'];
         $id = !empty($_POST['editIndex']) ? (int)$_POST['editIndex'] : 0;
 
         // Server-side validation for unique name
-        $check_sql = ($id > 0) ? "SELECT id FROM products WHERE name = '$name' AND id != $id" : "SELECT id FROM products WHERE name = '$name'";
-        $check_res = $conn->query($check_sql);
+        if ($id > 0) {
+            $check_stmt = $conn->prepare("SELECT id FROM products WHERE name = ? AND id != ?");
+            $check_stmt->bind_param("si", $name, $id);
+        } else {
+            $check_stmt = $conn->prepare("SELECT id FROM products WHERE name = ?");
+            $check_stmt->bind_param("s", $name);
+        }
+        $check_stmt->execute();
+        $check_res = $check_stmt->get_result();
 
         if ($check_res && $check_res->num_rows > 0) {
             $error = "Validation Error: A product with the name '$name' already exists.";
         } else {
             if ($id > 0) {
-                $conn->query("UPDATE products SET name='$name', category='$cat', price=$price, qty=$qty WHERE id=$id");
+                $stmt = $conn->prepare("UPDATE products SET name=?, category=?, price=?, qty=? WHERE id=?");
+                $stmt->bind_param("ssdii", $name, $cat, $price, $qty, $id);
             } else {
-                $conn->query("INSERT INTO products (name, category, price, qty) VALUES ('$name', '$cat', $price, $qty)");
+                $stmt = $conn->prepare("INSERT INTO products (name, category, price, qty) VALUES (?, ?, ?, ?)");
+                $stmt->bind_param("ssdi", $name, $cat, $price, $qty);
             }
+            $stmt->execute();
             header("Location: products.php");
             exit();
         }
@@ -36,8 +50,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $search = "";
 if (isset($_GET['search'])) {
-    $search = $conn->real_escape_string($_GET['search']);
-    $result = $conn->query("SELECT * FROM products WHERE name LIKE '%$search%' ORDER BY id DESC");
+    $search = $_GET['search'];
+    $like = "%" . $search . "%";
+    $stmt = $conn->prepare("SELECT * FROM products WHERE name LIKE ? ORDER BY id DESC");
+    $stmt->bind_param("s", $like);
+    $stmt->execute();
+    $result = $stmt->get_result();
 } else {
     $result = $conn->query("SELECT * FROM products ORDER BY id DESC");
 }

@@ -9,20 +9,18 @@ A full-stack web application for managing inventory, tracking stock levels, and 
 ## ✨ Features
 
 ### Core Functionality
-- ✅ **User Authentication** - Secure login & registration system
+- ✅ **User Authentication** - Secure login (bcrypt-hashed passwords)
 - ✅ **Product Management** - Add, edit, delete, and track products
 - ✅ **Stock Tracking** - Real-time inventory monitoring with low-stock alerts
 - ✅ **Sales Management** - Record and track all sales transactions
 - ✅ **Purchase Management** - Manage supplier purchases and restocking
 - ✅ **Dashboard** - Analytics and reporting with visual charts
-- ✅ **User Roles** - Admin and staff level access control
 - ✅ **Responsive Design** - Mobile-friendly interface
 
 ### Technical Highlights
-- Secure password hashing and session management
-- Database optimization for fast queries
-- Export functionality for reports
-- Audit logs for transaction tracking
+- Secure password hashing (bcrypt) and session management
+- Prepared statements against SQL injection
+- Non-invasive, filterable reports for products, sales, and stock
 
 ---
 
@@ -41,24 +39,22 @@ A full-stack web application for managing inventory, tracking stock levels, and 
 
 ```
 Inventory-Stock-Management-System/
-├── index.php              # Login & authentication
-├── dashboard.php          # Admin dashboard
-├── products/              # Product management pages
-│   ├── add_product.php
-│   ├── edit_product.php
-│   └── view_products.php
-├── sales/                 # Sales transaction pages
-│   ├── add_sale.php
-│   └── sales_history.php
-├── purchases/             # Purchase management pages
-│   ├── add_purchase.php
-│   └── purchase_history.php
-├── css/                   # Stylesheets
-├── js/                    # JavaScript files
-├── includes/              # Database connection & functions
-│   ├── config.php
-│   └── functions.php
-└── uploads/               # Product images
+├── db_config.php           # Database connection (edit credentials here)
+├── db/
+│   └── schema.sql          # MySQL schema + seed data (import first)
+├── html/                   # All pages
+│   ├── login.php           # Login & authentication
+│   ├── index.php           # Dashboard (stats & charts)
+│   ├── products.php        # Product management
+│   ├── categories.php      # Category management
+│   ├── sales.php           # Sales transactions
+│   ├── purchases.php       # Purchase / restocking
+│   ├── stock_status.php    # Real-time stock levels
+│   └── reports.php         # Reports & analytics
+├── css/                    # Stylesheets
+│   ├── style.css
+│   └── ihover.css
+└── js/                     # JavaScript files
 ```
 
 ---
@@ -73,24 +69,26 @@ Inventory-Stock-Management-System/
    ```
 
 2. **Set up Database**
-   - Create a MySQL database
-   - Import the database schema (included in `/db/schema.sql`)
-   - Update database credentials in `includes/config.php`
+   - Create a MySQL database (or let `db/schema.sql` create it)
+   - Import the schema: `mysql -u root -p < db/schema.sql`
+   - The schema creates the `inventory_system` database, all tables, and seed data.
 
 3. **Configure Settings**
    ```php
-   // includes/config.php
-   define('DB_HOST', 'localhost');
-   define('DB_USER', 'your_username');
-   define('DB_PASS', 'your_password');
-   define('DB_NAME', 'inventory_system');
+   // db_config.php
+   $host = "localhost";
+   $user = "root";
+   $pass = "";
+   $db   = "inventory_system";
    ```
 
 4. **Access the Application**
-   - Open `http://localhost/inventory-system` in your browser
+   - Start Apache + MySQL (e.g. XAMPP/WAMP)
+   - Open `http://localhost/Inventory-Stock-MAnagement-System/html/login.php`
    - Default login credentials (change after first login):
      - Username: `admin`
      - Password: `admin123`
+   - The password is stored as a bcrypt hash in the database.
 
 ---
 
@@ -123,12 +121,11 @@ Inventory-Stock-Management-System/
 
 ## 🔐 Security Features
 
-- ✅ SQL Injection Prevention (Prepared Statements)
-- ✅ XSS Protection (Input Sanitization)
-- ✅ CSRF Tokens on all forms
-- ✅ Secure password hashing (bcrypt)
-- ✅ Session management with timeout
-- ✅ Role-based access control
+- ✅ SQL Injection Prevention — all queries use **prepared statements** / parameterized binding
+- ✅ Secure password storage — bcrypt (`password_hash` / `password_verify`)
+- ✅ Session regeneration on login and server-side session auth check on every page
+- ✅ Output escaping in user-supplied search values (`htmlspecialchars`)
+- ⚠️ Note: this is a learning/demo project. For a production deployment, add **CSRF tokens** to all POST forms and **role-based access control** before going live.
 
 ---
 
@@ -178,9 +175,9 @@ Have a bug or feature request? Please create an issue on GitHub:
 
 - **Language:** PHP, MySQL, HTML5, CSS3, JavaScript
 - **Status:** ✅ Active & Maintained
-- **Last Updated:** July 2026
-- **Database Tables:** 5+
-- **Features:** 50+
+- **Last Updated:** August 2026
+- **Database Tables:** 5 (users, categories, products, sales, purchases)
+- **Features:** Authentication, inventory, categories, sales, purchases, stock alerts, reports & analytics
 
 ---
 

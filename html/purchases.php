@@ -16,7 +16,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['complete_purchase'])) 
     $stmt->execute();
 
     // 2. Update the product master quantity
-    $conn->query("UPDATE products SET qty = qty + $qty WHERE id = $product_id");
+    $stmt = $conn->prepare("UPDATE products SET qty = qty + ? WHERE id = ?");
+    $stmt->bind_param("ii", $qty, $product_id);
+    $stmt->execute();
 
     header("Location: purchases.php");
     exit();

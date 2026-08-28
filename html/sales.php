@@ -22,7 +22,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['process_sale'])) {
         $stmt->execute();
 
         // 2. Deduct Stock
-        $conn->query("UPDATE products SET qty = qty - $qty WHERE id = $product_id");
+        $stmt = $conn->prepare("UPDATE products SET qty = qty - ? WHERE id = ?");
+        $stmt->bind_param("ii", $qty, $product_id);
+        $stmt->execute();
 
         header("Location: sales.php");
         exit();
